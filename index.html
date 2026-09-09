@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>脱谱弹唱训练营 · 吉他进阶训练工具</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-icon">🎸</span>
+    <div>
+      <h1>脱谱弹唱训练营</h1>
+      <p>级数思维 · 套路记忆 · 耳朵验证</p>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="trainer">📅 今日训练</button>
+  <button class="tab" data-tab="library">📚 套路库</button>
+  <button class="tab" data-tab="ear">👂 听力炼耳</button>
+  <button class="tab" data-tab="challenge">🎲 随机挑战</button>
+  <button class="tab" data-tab="tools">🧰 工具箱</button>
+</nav>
+
+<main>
+  <!-- ============ 模块 1：今日训练 ============ -->
+  <section class="panel active" id="panel-trainer">
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 id="dayTitle">今日训练</h2>
+        <span class="badge" id="dayPhase"></span>
+      </div>
+      <div id="dayTasks" class="task-list"></div>
+      <div class="card-actions">
+        <button class="btn btn-primary" id="btnCheckin">✅ 完成今日打卡</button>
+        <button class="btn btn-ghost" id="btnPrevDay">← 前一天</button>
+        <button class="btn btn-ghost" id="btnNextDay">后一天 →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>打卡日历</h2></div>
+      <div id="calendar" class="calendar"></div>
+    </div>
+  </section>
+
+  <!-- ============ 模块 2：套路库 ============ -->
+  <section class="panel" id="panel-library">
+    <div class="card">
+      <div class="card-head"><h2>脱谱方法论：三步听懂一首歌</h2></div>
+      <ol class="method-list">
+        <li><b>定调</b>：哼出这首歌「最舒服的最后一个音」，在琴上找到它 —— 它大概率就是调（或 6 级小调的主音）。</li>
+        <li><b>找第一个和弦</b>：听歌的开头 / 主歌第一拍，按出你猜的和弦，跟原曲对一下对不对。</li>
+        <li><b>套路验证</b>：用 8 个万能进行的级数去套副歌 —— 弹一遍 1645，再试 1564，哪个「像」就是哪个。90% 的流行歌 30 秒内就能锁定。</li>
+      </ol>
+      <p class="tip-text">💡 记级数不记字母：套路是「形状」，换了调形状不变。这就是脱谱的核心。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>8 个万能进行</h2>
+        <label class="key-picker">试听调：
+          <select id="libKey"></select>
+        </label>
+      </div>
+      <div id="progList" class="prog-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>12 调移调速查表</h2></div>
+      <p class="tip-text">横看：某调各级和弦 · 竖看：套路在 12 个调里的搬法。重点先背 C / G / D。</p>
+      <div class="table-wrap"><table id="transposeTable"></table></div>
+    </div>
+  </section>
+
+  <!-- ============ 模块 3：听力炼耳 ============ -->
+  <section class="panel" id="panel-ear">
+    <div class="card">
+      <div class="card-head"><h2>听力炼耳</h2><span class="badge" id="earLevelBadge"></span></div>
+      <div class="level-row" id="earLevels"></div>
+      <p class="tip-text" id="earLevelDesc"></p>
+
+      <div class="ear-stage">
+        <div id="earQuestion" class="ear-question">点击「播放」，听辨下面的内容</div>
+        <button class="btn btn-primary btn-big" id="btnEarPlay">▶ 播放</button>
+        <div id="earOptions" class="ear-options"></div>
+        <div id="earFeedback" class="ear-feedback"></div>
+      </div>
+
+      <div class="ear-stats" id="earStats"></div>
+    </div>
+  </section>
+
+  <!-- ============ 模块 4：随机挑战 ============ -->
+  <section class="panel" id="panel-challenge">
+    <div class="card">
+      <div class="card-head"><h2>随机挑战 · 强制脱谱</h2></div>
+      <p class="tip-text">抽到什么弹什么，不允许犹豫 —— 这就是脱谱的真实场景。</p>
+
+      <div class="challenge-config">
+        <div class="cfg-block">
+          <span class="cfg-label">调性范围：</span>
+          <div id="keyScope" class="key-scope"></div>
+        </div>
+        <div class="cfg-block">
+          <span class="cfg-label">套路范围：</span>
+          <label><input type="radio" name="progScope" value="all" checked> 全部 8 个</label>
+          <label><input type="radio" name="progScope" value="basic"> 基础 4 个（1645/1564/6415/2516）</label>
+        </div>
+      </div>
+
+      <div class="challenge-result" id="challengeResult">
+        <div class="ch-line"><span class="ch-key" id="chKey">—</span></div>
+        <div class="ch-line"><span id="chProg">点击下方按钮开始挑战</span></div>
+        <div class="ch-line small"><span id="chChords"></span></div>
+        <div class="ch-line small"><span id="chRhythm"></span></div>
+        <div class="ch-line small"><span id="chBpm"></span></div>
+      </div>
+
+      <div class="timer-display" id="timerDisplay">02:00</div>
+
+      <div class="card-actions center">
+        <button class="btn btn-primary" id="btnRoll">🎲 抽一个</button>
+        <button class="btn btn-ghost" id="btnStartTimer">⏱ 开始 2 分钟挑战</button>
+        <button class="btn btn-ghost" id="btnChStop">⏹ 停止</button>
+      </div>
+      <div id="challengeCount" class="center small-text"></div>
+    </div>
+  </section>
+
+  <!-- ============ 模块 5：工具箱 ============ -->
+  <section class="panel" id="panel-tools">
+    <div class="card">
+      <div class="card-head"><h2>节拍器</h2></div>
+      <div class="metro-box">
+        <div class="metro-beats" id="metroBeats"></div>
+        <div class="metro-bpm">
+          <button class="btn btn-ghost btn-sm" id="bpmDown">−</button>
+          <span class="bpm-num" id="bpmNum">80</span>
+          <button class="btn btn-ghost btn-sm" id="bpmUp">＋</button>
+          <span class="bpm-label">BPM</span>
+        </div>
+        <input type="range" id="bpmSlider" min="40" max="200" value="80">
+        <div class="metro-beats-count">
+          拍号：
+          <select id="metroBeatsSel">
+            <option value="4" selected>4/4</option>
+            <option value="3">3/4</option>
+            <option value="6">6/8</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="btnMetro">▶ 启动节拍器</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>和弦指法卡</h2></div>
+      <p class="tip-text">点击任意和弦可试听。🎵 标记为你当前训练进行里出现的和弦。</p>
+      <div id="chordGrid" class="chord-grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>我的歌单套路表</h2></div>
+      <p class="tip-text">每脱谱一首歌就记一条：这首歌 = 什么调 + 什么套路。积少成多。</p>
+      <div class="song-form">
+        <input type="text" id="songName" placeholder="歌名，如：成都">
+        <input type="text" id="songFormula" placeholder="调 + 套路，如：C调 1645">
+        <button class="btn btn-primary" id="btnAddSong">＋ 记录</button>
+      </div>
+      <ul id="songList" class="song-list"></ul>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  每天 15 分钟 · 21 天脱谱 · 进度保存在本机浏览器
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/trainer.js"></script>
+<script src="js/ear.js"></script>
+<script src="js/challenge.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+/* ============================================================
+ * style.css — 深色音乐主题 · 移动端适配
+ * ============================================================ */
+:root {
+  --bg: #10141c;
+  --bg-soft: #171d29;
+  --card: #1c2432;
+  --card-hover: #232d3f;
+  --line: #2c3850;
+  --text: #e8edf5;
+  --text-dim: #93a0b8;
+  --amber: #ffb454;
+  --amber-deep: #e8952e;
+  --teal: #4fd1c5;
+  --rose: #ff6b81;
+  --green: #51cf66;
+  --red: #ff6b6b;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 头部 ---------- */
+.app-header {
+  padding: 20px 16px 12px;
+  background: linear-gradient(160deg, #1a2233 0%, #10141c 80%);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 12px; max-width: 760px; margin: 0 auto; }
+.brand-icon { font-size: 36px; }
+.brand h1 { font-size: 20px; letter-spacing: 1px; }
+.brand p { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+/* ---------- Tab 导航 ---------- */
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  max-width: 784px;
+  margin: 0 auto;
+}
+.tab {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .18s;
+}
+.tab:hover { color: var(--text); background: var(--card); }
+.tab.active { color: #1a1206; background: var(--amber); font-weight: 600; }
+
+/* ---------- 主区 ---------- */
+main { max-width: 760px; margin: 0 auto; padding: 16px 14px 60px; }
+.panel { display: none; }
+.panel.active { display: block; animation: fadein .22s ease; }
+@keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; gap: 10px; flex-wrap: wrap;
+}
+.card-head h2 { font-size: 16px; }
+.card-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.card-actions.center { justify-content: center; }
+
+.badge {
+  font-size: 12px; padding: 3px 10px; border-radius: 999px;
+  background: rgba(255,180,84,.14); color: var(--amber); border: 1px solid rgba(255,180,84,.3);
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+  border: none; border-radius: 10px; padding: 10px 16px;
+  font-size: 14px; cursor: pointer; transition: all .15s;
+  font-family: inherit;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--amber); color: #1a1206; font-weight: 600; }
+.btn-primary:hover { background: var(--amber-deep); }
+.btn-primary:disabled { background: #4a4f5c; color: #8b93a3; cursor: not-allowed; }
+.btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--text); }
+.btn-ghost:hover { background: var(--card-hover); }
+.btn-big { padding: 14px 34px; font-size: 16px; }
+.btn-sm { padding: 4px 12px; }
+.btn.done { background: rgba(81,207,102,.15); color: var(--green); border: 1px solid rgba(81,207,102,.35); }
+
+/* ---------- 今日训练 ---------- */
+.stats-row { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.stat-box {
+  flex: 1; min-width: 100px;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px; text-align: center;
+}
+.stat-num { font-size: 24px; font-weight: 700; color: var(--amber); }
+.stat-label { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+.progress-wrap { height: 8px; background: var(--bg-soft); border-radius: 999px; overflow: hidden; margin: 10px 0 4px; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--amber), var(--teal)); border-radius: 999px; transition: width .4s; }
+
+.task-list { display: flex; flex-direction: column; gap: 8px; }
+.task-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--bg-soft); border-radius: 10px; padding: 10px 12px;
+  font-size: 14px; line-height: 1.5;
+}
+.task-min {
+  flex-shrink: 0; font-size: 12px; color: var(--teal);
+  background: rgba(79,209,197,.12); border-radius: 6px; padding: 2px 8px; margin-top: 1px;
+}
+
+.calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal-cell {
+  aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; font-size: 11px;
+  background: var(--bg-soft); color: var(--text-dim); border: 1px solid transparent;
+}
+.cal-cell.done { background: rgba(255,180,84,.18); color: var(--amber); border-color: rgba(255,180,84,.4); font-weight: 600; }
+.cal-cell.today { border-color: var(--teal); }
+.cal-phase { font-size: 9px; opacity: .7; }
+
+/* ---------- 套路库 ---------- */
+.method-list { padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.7; }
+.tip-text { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-top: 8px; }
+
+.key-picker { font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+select, input[type="text"] {
+  background: var(--bg-soft); color: var(--text); border: 1px solid var(--line);
+  border-radius: 8px; padding: 6px 10px; font-size: 14px; font-family: inherit;
+}
+
+.prog-list { display: flex; flex-direction: column; gap: 10px; }
+.prog-card {
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px; cursor: pointer; transition: border-color .15s;
+}
+.prog-card:hover, .prog-card.playing { border-color: var(--amber); }
+.prog-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.prog-name { font-size: 15px; font-weight: 600; }
+.prog-formula { font-size: 15px; color: var(--amber); font-weight: 700; letter-spacing: 1px; }
+.prog-desc { font-size: 13px; color: var(--text-dim); margin-top: 6px; }
+.prog-chords { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.prog-chord {
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+  padding: 6px 12px; font-size: 14px; font-weight: 600; transition: all .12s;
+}
+.prog-chord.on { background: var(--amber); color: #1a1206; border-color: var(--amber); }
+.prog-songs { font-size: 12px; color: var(--teal); margin-top: 8px; }
+.prog-tip { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+.table-wrap { overflow-x: auto; margin-top: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: center; white-space: nowrap; }
+th { color: var(--amber); font-weight: 600; background: var(--bg-soft); }
+td.key-col { color: var(--amber); font-weight: 700; }
+td .m { color: var(--teal); }
+
+/* ---------- 听力炼耳 ---------- */
+.level-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.level-btn {
+  flex: 1; min-width: 70px; background: var(--bg-soft); border: 1px solid var(--line);
+  color: var(--text-dim); border-radius: 10px; padding: 8px 6px; font-size: 13px; cursor: pointer; font-family: inherit;
+}
+.level-btn.active { border-color: var(--amber); color: var(--amber); background: rgba(255,180,84,.1); }
+.level-btn.locked { opacity: .45; cursor: not-allowed; }
+
+.ear-stage { text-align: center; margin-top: 16px; }
+.ear-question { font-size: 14px; color: var(--text-dim); margin-bottom: 14px; }
+.ear-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px; max-width: 440px; margin-left: auto; margin-right: auto; }
+.ear-opt {
+  background: var(--bg-soft); border: 1px solid var(--line); color: var(--text);
+  border-radius: 10px; padding: 12px 8px; font-size: 14px; cursor: pointer; font-family: inherit;
+  transition: all .12s;
+}
+.ear-opt:hover { border-color: var(--amber); }
+.ear-opt.correct { background: rgba(81,207,102,.2); border-color: var(--green); color: var(--green); }
+.ear-opt.wrong { background: rgba(255,107,107,.15); border-color: var(--red); color: var(--red); }
+.ear-opt:disabled { cursor: default; opacity: .85; }
+.ear-feedback { min-height: 26px; margin-top: 12px; font-size: 14px; font-weight: 600; }
+.ear-feedback.ok { color: var(--green); }
+.ear-feedback.no { color: var(--red); }
+
+.ear-stats { margin-top: 14px; display: flex; justify-content: space-around; font-size: 13px; color: var(--text-dim); flex-wrap: wrap; gap: 6px; }
+.ear-stats b { color: var(--text); }
+
+/* ---------- 随机挑战 ---------- */
+.challenge-config { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.cfg-label { font-size: 13px; color: var(--text-dim); display: block; margin-bottom: 6px; }
+.cfg-block label { font-size: 13px; margin-right: 12px; color: var(--text); cursor: pointer; }
+.key-scope { display: flex; gap: 6px; flex-wrap: wrap; }
+.key-chip {
+  border: 1px solid var(--line); background: var(--bg-soft); color: var(--text-dim);
+  border-radius: 8px; padding: 5px 10px; font-size: 13px; cursor: pointer; font-family: inherit;
+}
+.key-chip.on { border-color: var(--teal); color: var(--teal); background: rgba(79,209,197,.1); }
+
+.challenge-result {
+  text-align: center; background: var(--bg-soft); border: 1px solid var(--line);
+  border-radius: 12px; padding: 22px 14px; margin: 8px 0;
+}
+.ch-key { font-size: 34px; font-weight: 800; color: var(--amber); }
+.ch-line { margin: 6px 0; font-size: 20px; font-weight: 700; }
+.ch-line.small { font-size: 14px; font-weight: 400; color: var(--text-dim); }
+
+.timer-display {
+  text-align: center; font-size: 44px; font-weight: 800; letter-spacing: 2px;
+  color: var(--teal); margin: 8px 0; font-variant-numeric: tabular-nums;
+}
+.timer-display.running { animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+.small-text { text-align: center; font-size: 12px; color: var(--text-dim); margin-top: 8px; }
+
+/* ---------- 工具箱 ---------- */
+.metro-box { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.metro-beats { display: flex; gap: 10px; min-height: 30px; align-items: center; }
+.metro-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--line); transition: all .08s;
+}
+.metro-dot.accent { width: 20px; height: 20px; }
+.metro-dot.on { background: var(--amber); box-shadow: 0 0 12px rgba(255,180,84,.8); }
+.metro-bpm { display: flex; align-items: center; gap: 14px; }
+.bpm-num { font-size: 40px; font-weight: 800; color: var(--amber); min-width: 88px; text-align: center; font-variant-numeric: tabular-nums; }
+.bpm-label { font-size: 13px; color: var(--text-dim); }
+input[type="range"] { width: 100%; max-width: 340px; accent-color: var(--amber); }
+.metro-beats-count { font-size: 14px; color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
+
+.chord-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.chord-card {
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 4px 6px; text-align: center; cursor: pointer; transition: border-color .12s;
+  position: relative;
+}
+.chord-card:hover { border-color: var(--amber); }
+.chord-card.active { border-color: var(--teal); }
+.chord-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.chord-mark { position: absolute; top: 5px; right: 7px; font-size: 11px; }
+
+.song-form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.song-form input { flex: 1; min-width: 130px; }
+.song-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.song-item {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  background: var(--bg-soft); border-radius: 8px; padding: 9px 12px; font-size: 14px;
+}
+.song-item .formula { color: var(--teal); font-size: 13px; }
+.song-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; }
+.song-del:hover { color: var(--red); }
+
+/* ---------- 页脚 ---------- */
+.app-footer { text-align: center; font-size: 12px; color: var(--text-dim); padding: 18px 0 26px; }
+
+/* ---------- 移动端 ---------- */
+@media (max-width: 560px) {
+  .brand h1 { font-size: 17px; }
+  .stat-num { font-size: 20px; }
+  .ch-key { font-size: 28px; }
+  .timer-display { font-size: 36px; }
+  .ear-options { grid-template-columns: 1fr 1fr; }
+  .card { padding: 13px; }
+}
