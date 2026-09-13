@@ -37,7 +37,7 @@ GT.Ear = (function () {
         rootMidi: 55 + Math.floor(Math.random() * 8), /* G3 附近 */
         answer: maj ? "大和弦" : "小和弦",
         options: ["大和弦", "小和弦"],
-        play: function () { GT.Audio.playMidiChord(this.rootMidi, maj ? "maj" : "min"); }
+        play: function () { GT.Audio.playMidiChord(this.rootMidi, maj ? "maj" : "min", 2.8); }
       };
     }
 
@@ -62,7 +62,12 @@ GT.Ear = (function () {
       key: key,
       answer: answerId,
       options: opts,
-      play: function () { GT.Audio.playProgression(key, prog.degrees, { loop: true }); }
+      /* 每个和弦的时长按进行长度自适应，让「听两遍」的总时长稳定在 ~9 秒；
+       * tail 让最后一个和弦自然飘走，而不是被切断。 */
+      play: function () {
+        var cd = Math.max(0.52, Math.min(0.95, 9 / (prog.degrees.length * 2)));
+        GT.Audio.playProgression(key, prog.degrees, { loop: true, chordDur: cd, tail: 1.4 });
+      }
     };
   }
 
@@ -156,6 +161,9 @@ GT.Ear = (function () {
     var correct = optId === q.answer;
     if (correct) { s.right++; s.streak++; } else { s.streak = 0; }
     store.set("earStats", state.stats);
+
+    /* 听力结果也进复习排期：答对升强度，答错明天回炉 */
+    if (q.type === "prog" && GT.Review) GT.Review.grade(q.answer, q.key, correct);
 
     var fb = document.getElementById("earFeedback");
     var buttons = document.querySelectorAll("#earOptions .ear-opt");

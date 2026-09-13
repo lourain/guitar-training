@@ -6,6 +6,7 @@
 GT.Trainer = (function () {
   var currentDay = 1;
   var store = GT.store;
+  var TOTAL = GT.TOTAL_DAYS;   /* 天数的唯一来源（21 天课程 + 7 天乱斗周） */
 
   function initData() {
     if (store.get("checkins") === undefined) store.set("checkins", {}); /* { "2026-09-09": day } */
@@ -42,6 +43,7 @@ GT.Trainer = (function () {
   function render() {
     renderStats();
     renderDay();
+    if (GT.Review) GT.Review.render();
     renderCalendar();
   }
 
@@ -49,17 +51,13 @@ GT.Trainer = (function () {
     var doneCount = Object.keys(getCheckins()).length;
     var row = document.getElementById("statsRow");
     row.innerHTML =
-      '<div class="stat-box"><div class="stat-num">' + doneCount + '<span style="font-size:14px">/21</span></div><div class="stat-label">已完成天数</div>' +
-      '<div class="progress-wrap"><div class="progress-bar" style="width:' + Math.round(doneCount / 21 * 100) + '%"></div></div></div>' +
+      '<div class="stat-box"><div class="stat-num">' + doneCount + '<span style="font-size:14px">/' + TOTAL + '</span></div><div class="stat-label">已完成天数</div>' +
+      '<div class="progress-wrap"><div class="progress-bar" style="width:' + Math.round(doneCount / TOTAL * 100) + '%"></div></div></div>' +
       '<div class="stat-box"><div class="stat-num">🔥 ' + streak() + '</div><div class="stat-label">连续打卡</div></div>' +
       '<div class="stat-box"><div class="stat-num">' + phaseName(currentDay) + '</div><div class="stat-label">当前阶段</div></div>';
   }
 
-  function phaseName(d) {
-    if (d <= 7) return "套路植入";
-    if (d <= 14) return "移调迁移";
-    return "实战脱谱";
-  }
+  function phaseName(d) { return GT.phaseName(d); }
 
   function renderDay() {
     var day = GT.COURSE[currentDay - 1];
@@ -84,6 +82,9 @@ GT.Trainer = (function () {
 
     /* 今日套歌：只下发「走向匹配 + 调性匹配」都通过的曲目 */
     tasksEl.appendChild(buildSongBlock(day));
+
+    /* 乱斗日：追加「今日乱斗单」 */
+    if (day.mix && day.mix.length && GT.Review) tasksEl.appendChild(GT.Review.mixBlock(day));
 
     /* 该日关联的套路试听入口 */
     if (day.progId && day.key) {
@@ -189,7 +190,7 @@ GT.Trainer = (function () {
     cal.innerHTML = "";
     var checkins = getCheckins();
     var today = GT.todayKey();
-    for (var d = 1; d <= 21; d++) {
+    for (var d = 1; d <= TOTAL; d++) {
       var cell = document.createElement("div");
       var dateStr = dateOfDayN(d); /* 第 d 天对应哪个日期不一定，日历按完成顺序展示 */
       var doneBy = Object.keys(checkins).find(function (k) { return checkins[k] === d; });
@@ -210,26 +211,32 @@ GT.Trainer = (function () {
     initData();
     /* 恢复上次进度：默认今天 = 未打卡的最小天数 */
     var resume = store.get("lastDay", 0);
-    currentDay = resume >= 1 && resume <= 21 ? resume : nextTodoDay();
+    currentDay = resume >= 1 && resume <= TOTAL ? resume : nextTodoDay();
 
     document.getElementById("btnCheckin").onclick = function () {
       if (isDone(currentDay)) return;
       var c = getCheckins();
       c[GT.todayKey()] = currentDay;
       store.set("checkins", c);
-      var next = currentDay < 21 ? currentDay + 1 : 21;
+      /* 打卡即把今天练的「套路 × 调」喂进复习队列 */
+      var day = GT.COURSE[currentDay - 1];
+      if (GT.Review && day) {
+        if (day.progId && day.key) GT.Review.seed(day.progId, day.key);
+        GT.Review.seedCells(day.mix);
+      }
+      var next = currentDay < TOTAL ? currentDay + 1 : TOTAL;
       store.set("lastDay", next);
       render();
     };
     document.getElementById("btnPrevDay").onclick = function () { if (currentDay > 1) { currentDay--; store.set("lastDay", currentDay); render(); } };
-    document.getElementById("btnNextDay").onclick = function () { if (currentDay < 21) { currentDay++; store.set("lastDay", currentDay); render(); } };
+    document.getElementById("btnNextDay").onclick = function () { if (currentDay < TOTAL) { currentDay++; store.set("lastDay", currentDay); render(); } };
 
     render();
   }
 
   function nextTodoDay() {
-    for (var d = 1; d <= 21; d++) if (!isDone(d)) return d;
-    return 21;
+    for (var d = 1; d <= TOTAL; d++) if (!isDone(d)) return d;
+    return TOTAL;
   }
 
   return { init: init, render: render };

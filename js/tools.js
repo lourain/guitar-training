@@ -173,8 +173,32 @@ GT.Tools = (function () {
     };
   }
 
+  /* ---------- 空间感（混响延音） ---------- */
+  function renderSpace() {
+    var v = GT.Audio.getSpace();
+    var num = document.getElementById("spaceNum");
+    if (num) num.textContent = Math.round(v * 100) + "%";
+    var slider = document.getElementById("spaceSlider");
+    if (slider && document.activeElement !== slider) slider.value = Math.round(v * 100);
+  }
+
+  function initSpace() {
+    var slider = document.getElementById("spaceSlider");
+    if (!slider) return;
+    renderSpace();
+    slider.oninput = function () {
+      GT.Audio.setSpace(parseInt(this.value, 10) / 100);
+      renderSpace();
+    };
+    var demo = document.getElementById("btnSpaceDemo");
+    if (demo) demo.onclick = function () {
+      GT.Audio.playProgression("C", [1, 6, 4, 5], { loop: false, chordDur: 1.0, tail: 1.8 });
+    };
+  }
+
   function init() {
     initMetro();
+    initSpace();
     initChordGrid();
     initSongs();
   }

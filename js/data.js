@@ -340,12 +340,118 @@ GT.RHYTHMS = [
   { id: "r6", name: "Funk 十六分 ×↑×↑", desc: "进阶：闷音与重音交替" }
 ];
 
-/* ---------- 21 天训练课程 ---------- */
+/* ---------- 阶段表（天号 → 阶段，唯一来源） ---------- */
+GT.PHASES = [
+  null,
+  { id: 1, name: "套路植入", desc: "C 调把 8 条走向练成手的默认动作" },
+  { id: 2, name: "移调迁移", desc: "搬调，把字母记忆拆成级数记忆" },
+  { id: 3, name: "实战脱谱", desc: "反过来：听到 → 判定 → 弹出" },
+  { id: 4, name: "乱斗复习", desc: "8 套路 × 4 个调轮转覆盖，之后交给间隔复习" }
+];
+
+/* 已学过的调。复习排期只在这些调里跑，不给没学过的调派任务 */
+GT.STUDY_KEYS = ["C", "G", "D", "A"];
+
+/* ============================================================
+ * 间隔复习：参数与算法
+ * 复习单位 = 套路 × 调（「搬调」才是这套训练的核心，
+ * C 调熟了不代表 G 调熟，混在一起等于没测）
+ * 间隔阶梯 1 → 3 → 7 → 14 → 30 天；每天最多推 DAILY_CAP 条
+ * ============================================================ */
+GT.REVIEW = {
+  LADDER: [1, 3, 7, 14, 30],  /* 熟练度 1..5 各自对应的下次间隔（天） */
+  MAX_LV: 5,                  /* 到顶后每 30 天维护一次 */
+  DAILY_CAP: 5,               /* 每天最多推几条，防止队列自我繁殖 */
+  CELL_KEYS: ["C", "G", "D", "A"]
+};
+
+GT.REVIEW.id = function (progId, key) { return progId + "|" + key; };
+
+GT.REVIEW.split = function (id) {
+  var i = id.indexOf("|");
+  return { progId: id.slice(0, i), key: id.slice(i + 1) };
+};
+
+GT.REVIEW.dateKey = function (d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+};
+
+GT.REVIEW.addDays = function (dateKey, n) {
+  var d = new Date(dateKey + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return GT.REVIEW.dateKey(d);
+};
+
+GT.REVIEW.newItem = function (today) {
+  return { lv: 0, due: GT.REVIEW.addDays(today, 1), lastGraded: null, ok: 0, ng: 0 };
+};
+
+/* 打卡入队：已存在的项保持原进度，绝不重置 */
+GT.REVIEW.seedItem = function (queue, progId, key, today) {
+  var id = GT.REVIEW.id(progId, key);
+  if (queue[id]) return queue[id];
+  queue[id] = { lv: 1, due: GT.REVIEW.addDays(today, 1), lastGraded: today, ok: 1, ng: 0 };
+  return queue[id];
+};
+
+/* 结算一次。一天只推进一级 —— 防止连点「练完了」或连答听力刷进度 */
+GT.REVIEW.grade = function (queue, progId, key, correct, today) {
+  var id = GT.REVIEW.id(progId, key);
+  var item = queue[id] || (queue[id] = GT.REVIEW.newItem(today));
+  if (correct) item.ok++; else item.ng++;
+  if (item.lastGraded === today) return item;
+  item.lastGraded = today;
+  if (correct) {
+    item.lv = Math.min(item.lv + 1, GT.REVIEW.MAX_LV);
+    item.due = GT.REVIEW.addDays(today, GT.REVIEW.LADDER[item.lv - 1]);
+  } else {
+    item.lv = Math.max(item.lv - 1, 0);
+    item.due = GT.REVIEW.addDays(today, 1);
+  }
+  return item;
+};
+
+/* 今日到期：最久没练 → 最弱 → 错得最多，然后封顶 */
+GT.REVIEW.dueIds = function (queue, today, cap) {
+  var ids = Object.keys(queue).filter(function (id) { return queue[id].due <= today; });
+  ids.sort(function (a, b) {
+    var x = queue[a], y = queue[b];
+    if (x.due !== y.due) return x.due < y.due ? -1 : 1;
+    if (x.lv !== y.lv) return x.lv - y.lv;
+    return (y.ng || 0) - (x.ng || 0);
+  });
+  return ids.slice(0, cap || GT.REVIEW.DAILY_CAP);
+};
+
+/* ---------- 乱斗周轮转表（Day 22-28） ----------
+ * 8 套路 × C/G/D/A = 32 格，7 天轮转覆盖满。
+ * 用「轮转覆盖」而非真随机：真随机一周很可能抽不到某条套路，复习就成了筛子。
+ * 每个调块内部错开起点，避免每天都从同一条套路顺着排。
+ */
+GT.MIX_WEEK = (function () {
+  var progs = GT.PROGRESSIONS.map(function (p) { return p.id; });
+  var cells = [];
+  GT.REVIEW.CELL_KEYS.forEach(function (k, ki) {
+    var off = (ki * 2) % progs.length;
+    progs.slice(off).concat(progs.slice(0, off)).forEach(function (pid) {
+      cells.push({ progId: pid, key: k });
+    });
+  });
+  var week = [];
+  for (var d = 0; d < 7; d++) {
+    var bucket = [];
+    for (var j = d; j < cells.length; j += 7) bucket.push(cells[j]);
+    week.push(bucket);
+  }
+  return week;
+})();
+
+/* ---------- 训练课程（21 天 + 7 天乱斗复习） ---------- */
 /* 每个 day：阶段 / 标题 / 任务列表 / 当日主练套路 / 当日练习调 / 当日套歌（已核对 id） */
-function day(d, phase, title, tasks, progId, key, songs) {
+function day(d, phase, title, tasks, progId, key, songs, mix) {
   return {
     day: d, phase: phase, title: title, tasks: tasks,
-    progId: progId, key: key, songs: songs || []
+    progId: progId, key: key, songs: songs || [], mix: mix || []
   };
 }
 function t(text, min) { return { text: text, min: min }; }
@@ -490,7 +596,52 @@ GT.COURSE = [
     t("验收 3：听力 L3/L4 共 12 题正确率 ≥ 75%", 6),
     t("毕业！给自己定下一个 21 天（换一批没练熟的套路再来一轮）", 1)
   ], null, null, [])
-];
+].concat(GT.MIX_WEEK.map(function (bucket, i) {
+  return day(22 + i, 4, "乱斗日 " + (i + 1) + " · 4 调切换", [
+    t("按下方「🎲 今日乱斗单」逐组弹，每组 2 分钟；开弹前先哼一遍低音唱名", 9),
+    t("换调不变形：同一套路在 C / G / D / A 之间连弹，嘴上唱名（do-la-fa-sol）不许变", 5),
+    t("听力：L3 或 L4 难度 10 题，正确率 ≥ 80%", 5)
+  ], null, null, [], bucket);
+}));
+
+/* 天数是唯一来源：以后加天数只改 COURSE，别在别处再写死数字 */
+GT.TOTAL_DAYS = GT.COURSE.length;
+
+GT.phaseName = function (dayNum) {
+  var d = GT.COURSE[dayNum - 1];
+  if (!d) return "";
+  var p = GT.PHASES[d.phase];
+  return p ? p.name : "";
+};
+
+/* 课程自检：天数连续 / 阶段合法 / 乱斗周覆盖满 32 格 */
+GT.validateCourse = function () {
+  var problems = [];
+  GT.COURSE.forEach(function (d, i) {
+    if (d.day !== i + 1) problems.push("第 " + (i + 1) + " 项天号是 " + d.day + "，不连续");
+    if (!GT.PHASES[d.phase]) problems.push("Day " + d.day + " 的阶段 " + d.phase + " 不在阶段表里");
+    if (d.phase === 4 && !(d.mix && d.mix.length)) problems.push("Day " + d.day + " 是乱斗日但缺 mix");
+    if (d.key && GT.STUDY_KEYS.indexOf(d.key) < 0) problems.push("Day " + d.day + " 用了没学过的调 " + d.key);
+  });
+  var seen = {}, total = 0;
+  GT.MIX_WEEK.forEach(function (b) {
+    b.forEach(function (c) {
+      total++;
+      var id = c.progId + "|" + c.key;
+      if (seen[id]) problems.push("乱斗周重复格子 " + id);
+      seen[id] = 1;
+      if (!GT.getProgression(c.progId)) problems.push("乱斗周引用了不存在的套路 " + c.progId);
+    });
+  });
+  GT.PROGRESSIONS.forEach(function (p) {
+    GT.REVIEW.CELL_KEYS.forEach(function (k) {
+      if (!seen[p.id + "|" + k]) problems.push("乱斗周漏了 " + p.formula + " @ " + k + " 调");
+    });
+  });
+  var want = GT.PROGRESSIONS.length * GT.REVIEW.CELL_KEYS.length;
+  if (total !== want) problems.push("乱斗周共 " + total + " 格，应为 " + want);
+  return problems;
+};
 
 /* ---------- 和弦指法库（6 弦低音 E → 1 弦高音 e，-1=闷音 0=空弦） ---------- */
 GT.CHORDS = [

@@ -114,15 +114,15 @@
     table.innerHTML = head + rows;
   }
 
-  /* ---------- 曲库数据自检（防止再出现"标注走向与实测走向不符"） ---------- */
+  /* ---------- 数据自检（防止再出现"标注走向与实测走向不符"） ---------- */
   function selfCheck() {
-    var problems = GT.validateSongs();
+    var problems = GT.validateSongs().concat(GT.validateCourse ? GT.validateCourse() : []);
     if (problems.length) {
-      window.console && console.warn("【曲库数据自检发现问题】\n" + problems.join("\n"));
+      window.console && console.warn("【数据自检发现问题】\n" + problems.join("\n"));
       var box = document.getElementById("dataWarn");
       if (box) {
         box.style.display = "block";
-        box.textContent = "⚠️ 曲库数据自检发现 " + problems.length + " 处走向标注与实测不符，已跳过这些条目：" + problems.join("；");
+        box.textContent = "⚠️ 数据自检发现 " + problems.length + " 处问题：" + problems.join("；");
       }
     }
   }
@@ -135,6 +135,7 @@
     renderLibrary();
     renderTransposeTable();
     GT.Trainer.init();
+    if (GT.Review) GT.Review.init();
     GT.Ear.init();
     GT.Challenge.init();
     GT.Tools.init();
