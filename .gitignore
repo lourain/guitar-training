@@ -1,0 +1,8 @@
+# WorkBuddy 本地数据：记忆笔记 + 自检 skill，仅保留在本机，不随仓库发布
+.workbuddy/
+
+# 本地截图验证用的临时页面（开发期生成）
+.shot.html
+
+# macOS
+.DS_Store
