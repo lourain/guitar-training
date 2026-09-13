@@ -169,8 +169,47 @@ select, input[type="text"] {
   padding: 6px 12px; font-size: 14px; font-weight: 600; transition: all .12s;
 }
 .prog-chord.on { background: var(--amber); color: #1a1206; border-color: var(--amber); }
-.prog-songs { font-size: 12px; color: var(--teal); margin-top: 8px; }
+.prog-songs { font-size: 12px; color: var(--teal); margin-top: 8px; line-height: 1.7; }
+.prog-song-tag {
+  font-size: 10px; padding: 1px 6px; border-radius: 999px; margin-left: 3px;
+  background: rgba(79,209,197,.14); color: var(--teal); border: 1px solid rgba(79,209,197,.3);
+  white-space: nowrap;
+}
 .prog-tip { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+/* ---------- 今日套歌 ---------- */
+.data-warn {
+  background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.35); color: var(--red);
+  border-radius: 12px; padding: 10px 12px; font-size: 12px; line-height: 1.6; margin-bottom: 14px;
+}
+.song-block {
+  margin-top: 12px; padding: 12px;
+  background: rgba(79,209,197,.06); border: 1px solid rgba(79,209,197,.25); border-radius: 12px;
+}
+.song-block-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  font-size: 13px; font-weight: 600; color: var(--teal);
+}
+.song-key-chip {
+  font-size: 11px; font-weight: 400; padding: 2px 9px; border-radius: 999px;
+  background: rgba(79,209,197,.14); border: 1px solid rgba(79,209,197,.35); color: var(--teal); white-space: nowrap;
+}
+.song-row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.song-rowtop { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.song-title { font-size: 14px; font-weight: 700; }
+.song-sec {
+  font-size: 11px; padding: 2px 8px; border-radius: 6px;
+  background: rgba(255,180,84,.14); color: var(--amber); border: 1px solid rgba(255,180,84,.3);
+}
+.song-deg { font-size: 13px; font-weight: 700; color: var(--amber); letter-spacing: .5px; }
+.song-tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+.song-tag.ok { background: rgba(81,207,102,.15); color: var(--green); border: 1px solid rgba(81,207,102,.3); }
+.song-tag.neutral { background: var(--card); color: var(--text-dim); border: 1px solid var(--line); }
+.song-lyric { font-size: 13px; color: var(--text); margin-top: 6px; line-height: 1.5; }
+.song-chords { font-size: 13px; color: var(--teal); font-weight: 600; margin-top: 4px; }
+.song-meta { font-size: 12px; color: var(--text-dim); margin-top: 3px; line-height: 1.5; }
+.song-note { font-size: 12px; color: var(--amber); margin-top: 4px; line-height: 1.55; }
+.song-empty { font-size: 13px; color: var(--text-dim); margin-top: 8px; line-height: 1.6; }
 
 .table-wrap { overflow-x: auto; margin-top: 8px; }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }

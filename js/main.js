@@ -33,11 +33,25 @@
       var chordsHtml = p.degrees.map(function (d) {
         return '<span class="prog-chord">' + GT.chordName(key, d) + "</span>";
       }).join("");
+
+      /* 代表歌按「当前试听调」过滤：调弹不了的直接不列，避免练到一个没学过的调 */
+      var songs = GT.progSongs(p.id, key);
+      var songsHtml;
+      if (songs.length) {
+        songsHtml = "🎧 " + key + " 调可弹（已核对走向）：" + songs.map(function (s) {
+          var label = GT.songMatchLabel(s, p.id);
+          return "《" + s.title + "》" + s.section + " " + GT.degText(s.degrees) +
+            (label ? '<span class="prog-song-tag">' + label + "</span>" : "");
+        }).join(" · ");
+      } else {
+        songsHtml = "🎧 " + key + " 调暂无可弹用例 —— 换别的调看，或先用套路本身练熟（这条我们不硬凑歌）";
+      }
+
       card.innerHTML =
         '<div class="prog-top"><span class="prog-name">' + p.name + '</span><span class="prog-formula">' + p.formula + "</span></div>" +
         '<div class="prog-desc">' + p.desc + "</div>" +
         '<div class="prog-chords">' + chordsHtml + "</div>" +
-        '<div class="prog-songs">🎧 代表歌：' + p.songs.join(" · ") + "</div>" +
+        '<div class="prog-songs">' + songsHtml + "</div>" +
         '<div class="prog-tip">💡 ' + p.tip + "</div>";
       card.title = "点击试听该进行（" + key + " 调）";
       card.onclick = function () {
@@ -100,8 +114,22 @@
     table.innerHTML = head + rows;
   }
 
+  /* ---------- 曲库数据自检（防止再出现"标注走向与实测走向不符"） ---------- */
+  function selfCheck() {
+    var problems = GT.validateSongs();
+    if (problems.length) {
+      window.console && console.warn("【曲库数据自检发现问题】\n" + problems.join("\n"));
+      var box = document.getElementById("dataWarn");
+      if (box) {
+        box.style.display = "block";
+        box.textContent = "⚠️ 曲库数据自检发现 " + problems.length + " 处走向标注与实测不符，已跳过这些条目：" + problems.join("；");
+      }
+    }
+  }
+
   /* ---------- 启动 ---------- */
   document.addEventListener("DOMContentLoaded", function () {
+    selfCheck();
     initTabs();
     initLibKey();
     renderLibrary();

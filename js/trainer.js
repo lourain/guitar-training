@@ -82,13 +82,16 @@ GT.Trainer = (function () {
       tasksEl.appendChild(div);
     });
 
+    /* 今日套歌：只下发「走向匹配 + 调性匹配」都通过的曲目 */
+    tasksEl.appendChild(buildSongBlock(day));
+
     /* 该日关联的套路试听入口 */
     if (day.progId && day.key) {
       var p = GT.getProgression(day.progId);
       var div = document.createElement("div");
       div.className = "task-item";
       div.style.cursor = "pointer";
-      div.innerHTML = '<span class="task-min">🎵 试听</span><span>今日套路 <b style="color:var(--amber)">' + p.formula +
+      div.innerHTML = '<span class="task-min">🎵 试听</span><span>今日主练套路 <b style="color:var(--amber)">' + p.formula +
         '</b> @' + day.key + " 调（" + degreesToChords(p.degrees, day.key).join(" → ") + "）— 点此播放</span>";
       div.onclick = function () {
         GT.Audio.playProgression(day.key, p.degrees, { loop: true });
@@ -103,6 +106,78 @@ GT.Trainer = (function () {
       btn.textContent = "✅ 完成今日打卡";
       btn.classList.remove("done");
     }
+  }
+
+  /* ---------- 今日套歌区块 ---------- */
+  function buildSongBlock(day) {
+    var wrap = document.createElement("div");
+    wrap.className = "song-block";
+
+    var prog = day.progId ? GT.getProgression(day.progId) : null;
+    var songs = (day.songs || []).map(function (id) { return GT.getSong(id); }).filter(Boolean);
+
+    var head = '<div class="song-block-head"><span>🎧 今日套歌 · 走向已核对</span>' +
+      (day.key
+        ? '<span class="song-key-chip">练习调 ' + day.key + " 调</span>"
+        : '<span class="song-key-chip">调性自选</span>') +
+      "</div>";
+    var html = head;
+
+    if (!songs.length) {
+      html += '<div class="song-empty">今天没有已核对的整曲用例，直接练套路本身即可（别去乱翻没核对过的歌）。</div>';
+      wrap.innerHTML = html;
+      return wrap;
+    }
+
+    html += '<div class="song-note" style="margin-top:6px">' +
+      (day.key
+        ? "下面这些曲目都是「<b>" + day.key + " 调</b>弹得了 + 走向写清楚了哪一段」的；原调不是 " + day.key + " 调的已经标出来。"
+        : "下面这些曲目走向已核对，调性自选，弹之前先自己定调。") +
+      "</div>";
+
+    songs.forEach(function (s) {
+      /* 硬校验：调性对不上就不下发 */
+      if (day.key && s.playKeys.indexOf(day.key) < 0) {
+        window.console && console.warn("【调性不符已拦截】《" + s.title + "》不支持 " + day.key +
+          " 调，已核对的调为：" + s.playKeys.join(" / "));
+        return;
+      }
+
+      var kind = prog ? GT.songMatchKind(s, prog) : null;
+      var tag;
+      if (!prog) {
+        tag = '<span class="song-tag neutral">原调 ' + s.originalKey + " 调</span>";
+      } else if (kind) {
+        tag = '<span class="song-tag ok">✓ ' + GT.MATCH_LABEL[kind] + "</span>";
+      } else {
+        tag = '<span class="song-tag neutral">另一条套路 · ' + GT.degText(s.degrees) + "</span>";
+      }
+
+      var displayKey = day.key || s.playKeys[0] || s.originalKey;
+      var chords = degreesToChords(s.degrees, displayKey).join(" → ");
+
+      var keyLine = "原调 " + s.originalKey + " 调";
+      if (s.originalKey === displayKey) keyLine += "（＝本练习调，直接弹，不用变调夹）";
+      else if (s.capo) keyLine += " · 用 C 调指法夹 " + s.capo + " 品＝原调";
+      else keyLine += " · 本练习按 " + displayKey + " 调移调弹";
+
+      html +=
+        '<div class="song-row">' +
+          '<div class="song-rowtop">' +
+            '<span class="song-title">《' + s.title + "》</span>" +
+            '<span class="song-sec">' + s.section + "</span>" +
+            '<span class="song-deg">' + GT.degText(s.degrees) + "</span>" +
+            tag +
+          "</div>" +
+          '<div class="song-lyric">「' + s.lyric + "」</div>" +
+          '<div class="song-chords">' + displayKey + " 调：" + chords + "</div>" +
+          '<div class="song-meta">' + keyLine + "</div>" +
+          (s.note ? '<div class="song-note">⚠️ ' + s.note + "</div>" : "") +
+        "</div>";
+    });
+
+    wrap.innerHTML = html;
+    return wrap;
   }
 
   function degreesToChords(degrees, key) {
